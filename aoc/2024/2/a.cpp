@@ -5,18 +5,11 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <iterator>
+#include <pthread.h>
 #include <vector>
 using namespace std;
 
 typedef unsigned long long ll;
-
-void printList(vector<int> *v) {
-  for (int e : *v) {
-    cout << e << " ";
-  }
-  cout << endl;
-}
 
 ll solve1(string inputFile) {
   ifstream cin(inputFile);
@@ -67,16 +60,18 @@ ll solve2(string inputFile) {
       list.push_back(val);
     }
 
-    auto ass = [&list]() {
-      auto subAss = [](vector<int> list, int remove, int dir) {
+    auto checkAll = [&list]() {
+      auto check = [](vector<int> list, int remove) {
         if (remove >= 0) {
           list.erase(begin(list) + remove);
         }
-        function<bool(int, int)> cmp =
-            (dir == 0) ? ([](int a, int b) { return a > b && a - b <= 3; })
-                       : ([](int a, int b) { return a < b && b - a <= 3; });
 
-        for (size_t i = 1; i < list.size(); i++) {
+        function<bool(int, int)> cmp =
+            (list[0] > list[list.size() - 1])
+                ? ([](int a, int b) { return a > b && a - b <= 3; })
+                : ([](int a, int b) { return a < b && b - a <= 3; });
+
+        for (int i = 1; i < (int)list.size(); i++) {
           if (!cmp(list[i - 1], list[i])) {
             return false;
           }
@@ -85,16 +80,14 @@ ll solve2(string inputFile) {
       };
 
       for (int remove = -1; remove < (int)list.size(); remove++) {
-        for (int dir = 0; dir < 2; dir++) {
-          if (subAss(list, remove, dir)) {
-            return true;
-          }
+        if (check(list, remove)) {
+          return true;
         }
       }
       return false;
     };
 
-    sum += ass();
+    sum += checkAll();
   }
   return sum;
 }
@@ -106,10 +99,9 @@ void test(string inputFile, int expected, function<ll(string)> func) {
   }
 }
 int main() {
-  // test("ex0", 2, solve1);
-  // printf("solve1, %lld\n", solve1("in0"));
+  test("ex0", 2, solve1);
+  printf("solve1, %lld\n", solve1("in0"));
   test("ex0", 4, solve2);
-  test("in0", 658, solve2);
   printf("solve2, %lld\n", solve2("in0"));
   return 0;
 }
