@@ -1,0 +1,1 @@
+: a.cpp |> g++ -Wall -g a.cpp -o a |> a
