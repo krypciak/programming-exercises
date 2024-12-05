@@ -29,7 +29,6 @@ int solve1(string inFile) {
 
   int sum = 0;
 
-  int ite = 0;
   while (getline(cin, line)) {
     transform(begin(line), end(line), begin(line),
               [](char c) { return c == ',' ? ' ' : c; });
@@ -55,9 +54,62 @@ int solve1(string inFile) {
     };
 
     sum += check();
+  }
 
+  return sum;
+}
+
+int solve1Quick(string inFile) {
+  ifstream cin(inFile);
+
+  vector<vector<short>> befRules(10'000);
+
+  string line;
+  while (getline(cin, line) && line != "") {
+    transform(begin(line), end(line), begin(line),
+              [](char c) { return c == '|' ? ' ' : c; });
+    stringstream ss(line);
+
+    short bef, aft;
+    ss >> bef >> aft;
+
+    befRules[bef].push_back(aft);
+  }
+
+  int sum = 0;
+
+  int ite = 0;
+  while (getline(cin, line)) {
+    transform(begin(line), end(line), begin(line),
+              [](char c) { return c == ',' ? ' ' : c; });
+    stringstream ss(line);
+
+    function<int()> check = [&]() {
+      set<short> used;
+
+      vector<short> nums;
+      short num;
+      while (ss >> num) {
+        nums.push_back(num);
+      }
+
+      for (int i = 0; i < (int)nums.size(); i++) {
+        num = nums[i];
+
+        for (short aft : befRules[num]) {
+          if (used.count(aft) > 0)
+            return 0;
+        }
+
+        used.insert(num);
+      }
+
+      return (int)nums[(nums.size() - 1) / 2];
+    };
+
+    sum += check();
     ite++;
-    cout << ite << endl;
+    // cout << ite << endl;
   }
 
   return sum;
@@ -139,10 +191,10 @@ int solve2(string inFile) {
 }
 
 int main() {
-  // printf("solve1 ex0 (143 expected): %d\n", solve1("ex0"));
-  // printf("solve1 in0: %d\n", solve1("in0"));
-  // printf("solve2 ex0 (123 expected): %d\n", solve2("ex0"));
-  // printf("solve2 in0 (6319 expected): %d\n", solve2("in0"));
-  cout << solve1("bigboy.txt") << endl;
+  // printf("solve1 ex0 (143 expected): %d\n", solve1Quick("ex0"));
+  // printf("solve1 in0 (4790 expected): %d\n", solve1Quick("in0"));
+  // printf("solve2 ex0 (123 expected): %d\n", solve2Quick("ex0"));
+  // printf("solve2 in0 (6319 expected): %d\n", solve2Quick("in0"));
+  cout << solve1Quick("bigboy.txt") << endl;
   return 0;
 }
