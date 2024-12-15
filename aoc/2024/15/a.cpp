@@ -176,24 +176,43 @@ ll solve2(string fileName) {
 
   Vec2 pos = initialPos;
 
+  ofstream drawing;
+  drawing.open("das.rec");
+  drawing << "{\"version\": 2, \"width\": 109, \"height\": 55, \"timestamp\": "
+             "1734256029, \"env\": {\"SHELL\": \"/bin/bash\", \"TERM\": "
+             "\"foot\"}}\n";
+
+  const int fps = 50;
+  const int printEvery = 25;
+  long double lastTime = 0;
+  int printIndex = -1;
   auto printMap = [&](Dir dir) {
-    printf("move: %d\n", dir);
+    printIndex++;
+    if (printIndex % printEvery != 0)
+      return;
+    lastTime += ((long double)1 / fps);
+
+    drawing << "[" << lastTime << ", \"o\", \"";
+
+    drawing << "\\u001b[2J\\u001b[1;1";
+    drawing << "move: " << dir << "\\r\\n";
+
     for (int y = 0; y < h; y++) {
       for (int x = 0; x < w; x++) {
         if (x == pos.x && y == pos.y) {
           assert(map[y][x] == '.');
-          cout << '@';
+          drawing << '@';
         } else {
-          cout << map[y][x];
+          drawing << map[y][x];
         }
       }
-      cout << '\n';
+      drawing << "\\r\\n";
     }
-    cout << endl;
+    drawing << "\"]\n";
   };
 
   for (Dir move : moves) {
-    // printMap();
+    printMap(move);
     Vec2 v = dirToVec[move];
     Vec2 newPos = {pos.x + v.x, pos.y + v.y};
     char c = map[newPos.y][newPos.x];
@@ -308,6 +327,7 @@ ll solve2(string fileName) {
     }
   }
 
+  drawing.close();
   return sum;
 }
 
@@ -315,7 +335,7 @@ int main() {
   // printf("solve1 ex0 (2028 expected): %llu\n", solve1("ex0"));
   // printf("solve1 ex1 (10092 expected): %llu\n", solve1("ex1"));
   // printf("solve1 in0 (1436690 expected): %llu\n", solve1("in0"));
-  printf("solve2 ex1 (9021 expected): %llu\n", solve2("ex1"));
+  // printf("solve2 ex1 (9021 expected): %llu\n", solve2("ex1"));
   printf("solve2 in0 ( expected): %llu\n", solve2("in0"));
   return 0;
 }
