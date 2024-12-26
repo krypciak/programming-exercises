@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -53,7 +54,7 @@ ll solve1(string inputFile, int stageCount) {
   numericCharToId['A'] = 10;
 
   for (int i = '0'; i < 'A' + 1; i++) {
-    if (numericShortestMap[i].size() == 0)
+    if (numericShortestMap[i].empty())
       continue;
 
     for (int j = 0; j < (int)numericShortestMap[i].size(); j++) {
@@ -73,10 +74,10 @@ ll solve1(string inputFile, int stageCount) {
   vector<vector<vector<string>>> keypadShortestMap('v'+1);
   //     /*                  ^ (0)         A (1)         < (2)    v (3)         > (4)         */
   keypadShortestMap['^'] = { {""},         {">"},        {"v<"},  {"v"},        {"v>", ">v"}, };
-  keypadShortestMap['A'] = { {"<"},        {""},         {"v<<"}, {"v<", "<v"}, {"v"},        };
+  keypadShortestMap['A'] = { {"<"},        {""},         {"v<<"}, {/*"v<",*/ "<v"}, {"v"},        };
   keypadShortestMap['<'] = { {">^"},       {">>^"},      {""},    {">"},        {">>"},       };
   keypadShortestMap['v'] = { {"^"},        {"^>", ">^"}, {"<"},   {""},         {">"},        };
-  keypadShortestMap['>'] = { {"^<", "<^"}, {"^"},        {"<<"},  {"<"},        {""},         };
+  keypadShortestMap['>'] = { {/*"^<",*/ "<^"}, {"^"},        {"<<"},  {"<"},        {""},         };
   // clang-format on
 
   vector<int> keypadCharToId('v' + 1);
@@ -87,7 +88,7 @@ ll solve1(string inputFile, int stageCount) {
   keypadCharToId['>'] = 4;
 
   for (int i = '<'; i < 'v' + 1; i++) {
-    if (keypadShortestMap[i].size() == 0)
+    if (keypadShortestMap[i].empty())
       continue;
 
     for (int j = 0; j < (int)keypadShortestMap[i].size(); j++) {
@@ -98,33 +99,46 @@ ll solve1(string inputFile, int stageCount) {
   }
 
   for (string code : codes) {
-    ll shortestLen = 1000000000000000000;
+    ll shortestLen = 10000000000000000000llu;
 
     struct Entry {
-      vector<char> armPos;
+      string armPos;
       ll len;
       vector<string> leftToProcess;
       int stage;
       int charI;
+      int id;
+      vector<string> origExp;
+      string path;
     };
-
     const int finalStage = stageCount + 1;
 
-    int ite = 0;
-    vector<Entry> toProcess;
-    toProcess.push_back({vector<char>(finalStage, 'A'), 0,
-                         vector<string>(finalStage, ""), 0, 0});
-    while (toProcess.size() > 0) {
-      ite++;
-      if (ite % 1000000 == 0) {
-        print("ite: {}, size: {}\n", ite, toProcess.size());
-      }
-      vector<Entry> nextToProcess;
-      for (auto [armPos, len, leftToProcess, stage, charI] : toProcess) {
+    struct CacheEntry {
+      ll sum;
+      int startId;
+      bool done;
+    };
+    unordered_map<string, CacheEntry> cache;
 
-        // print("stage {}, len: {}, charI: {}\n", stage, len, charI);
+    auto getCacheKey = [](int stage, string exp) -> string {
+      return to_string(stage) + exp;
+    };
+
+    int cacheHits = 0;
+
+    vector<Entry> toProcess;
+    toProcess.push_back({string(finalStage, 'A'), 0,
+                         vector<string>(finalStage, ""), 0, 0, -1,
+                         vector<string>(finalStage), ""});
+
+    int idklew = 0;
+    while (toProcess.size() > 0) {
+      vector<Entry> nextToProcess;
+      for (auto [armPos, len, leftToProcess, stage, charI, id, origExp,
+                 expanded] : toProcess) {
+
         if (stage == 0) {
-          assert(leftToProcess[0].size() == 0);
+          assert(leftToProcess[0].empty());
           if (charI >= (int)code.size()) {
             if (len < shortestLen) {
               shortestLen = len;
@@ -134,56 +148,125 @@ ll solve1(string inputFile, int stageCount) {
           char c = code[charI];
           vector<string> paths =
               numericShortestMap[armPos[0]][numericCharToId[c]];
-          for (string path : paths) {
-            vector<char> newArmPos = armPos;
-            newArmPos[0] = c;
 
-            vector<string> newLeftToProcess = leftToProcess;
-            newLeftToProcess[0] = path;
-            nextToProcess.push_back(
-                {newArmPos, len, newLeftToProcess, 1, charI});
+          for (string path : paths) {
+            armPos[0] = c;
+            leftToProcess[0] = path;
+            origExp[0] = path;
+            nextToProcess.push_back({armPos, len, leftToProcess, 1, charI,
+                                     idklew++, origExp, expanded});
           }
         } else if (stage == 1) {
-          assert(leftToProcess[1].size() == 0);
-          if (leftToProcess[0].size() == 0) {
-            nextToProcess.push_back({armPos, len, leftToProcess, 0, charI + 1});
+          assert(leftToProcess[1].empty());
+          if (leftToProcess[0].empty()) {
+            nextToProcess.push_back({armPos, len, leftToProcess, 0, charI + 1,
+                                     id, origExp, expanded});
             continue;
           }
 
           char c = leftToProcess[0][0];
           leftToProcess[0] = leftToProcess[0].substr(1);
+          // string path = keypadShortestMap[armPos[1]][keypadCharToId[c]][0];
+          vector<string> paths =
+              keypadShortestMap[armPos[1]][keypadCharToId[c]];
 
-          string path = keypadShortestMap[armPos[1]][keypadCharToId[c]][0];
-          armPos[1] = c;
-          leftToProcess[1] = path;
-          nextToProcess.push_back({armPos, len, leftToProcess, 2, charI});
-        } else if (stage >= 2 && stage < finalStage) {
-          assert(leftToProcess[stage].size() == 0);
-          if (leftToProcess[stage - 1].size() == 0) {
+          for (string path : paths) {
+            armPos[1] = c;
+            leftToProcess[1] = path;
+            origExp[1] = path;
             nextToProcess.push_back(
-                {armPos, len, leftToProcess, stage - 1, charI});
+                {armPos, len, leftToProcess, 2, charI, id, origExp, expanded});
+            break;
+          }
+        } else if (stage >= 2 && stage < finalStage) {
+          const int minStageCache = 0;
+
+          assert(leftToProcess[stage].empty());
+          if (leftToProcess[stage - 1].empty()) {
+
+            if (stage > minStageCache && stage != finalStage - 1) {
+              auto cacheKey = getCacheKey(stage, origExp[stage - 1]);
+              assert(cache.count(cacheKey) > 0);
+              CacheEntry *e = &cache[cacheKey];
+              if (!e->done && id == e->startId) {
+                e->sum = len - e->sum;
+                e->done = true;
+              }
+            }
+
+            nextToProcess.push_back({armPos, len, leftToProcess, stage - 1,
+                                     charI, id, origExp, expanded});
             continue;
+          }
+
+          if (stage > minStageCache && stage != finalStage - 1) {
+            bool isFirst = true;
+            for (int i = stage; i < finalStage; i++) {
+              if (armPos[i] != 'A') {
+                isFirst = false;
+                break;
+              }
+            }
+            if (isFirst) {
+              // print("isFirstOrLast stage {}, armPos: {}\n", stage, armPos);
+              auto cacheKey = getCacheKey(stage, origExp[stage - 1]);
+              if (cache.count(cacheKey) == 0) {
+                // print("cache start id: {}, key: {}\n", id, cacheKey);
+                cache[cacheKey] = {len, id, false};
+              } else {
+                CacheEntry *e = &cache[cacheKey];
+                if (e->done) {
+                  len += e->sum;
+                  cacheHits++;
+                  if (cacheHits % 100000 == 0) {
+                    print("skipping at stage {}, armPos: {}, add: {}\n", stage,
+                          armPos, e->sum);
+                    print("where char '{}' expanded into {}\n",
+                          origExp[stage - 1], leftToProcess[stage - 1]);
+                  }
+                  leftToProcess[stage - 1] = "";
+                  nextToProcess.push_back({armPos, len, leftToProcess, stage,
+                                           charI, id, origExp, expanded});
+                  continue;
+                }
+              }
+            }
           }
 
           char c = leftToProcess[stage - 1][0];
           leftToProcess[stage - 1] = leftToProcess[stage - 1].substr(1);
 
-          string path = keypadShortestMap[armPos[stage]][keypadCharToId[c]][0];
-          armPos[stage] = c;
-          leftToProcess[stage] = path;
-          nextToProcess.push_back(
-              {armPos, len, leftToProcess, stage + 1, charI});
+          // string path =
+          // keypadShortestMap[armPos[stage]][keypadCharToId[c]][0];
+          vector<string> paths =
+              keypadShortestMap[armPos[stage]][keypadCharToId[c]];
+
+          for (string path : paths) {
+            armPos[stage] = c;
+            leftToProcess[stage] = path;
+            origExp[stage] = path;
+            nextToProcess.push_back({armPos, len, leftToProcess, stage + 1,
+                                     charI, id, origExp, expanded});
+
+            break;
+          }
         } else if (stage == finalStage) {
           len += leftToProcess[finalStage - 1].size();
+          string das = leftToProcess[finalStage - 1];
+          string newPath = expanded + das + " ";
+
           leftToProcess[finalStage - 1] = "";
 
-          nextToProcess.push_back(
-              {armPos, len, leftToProcess, finalStage - 1, charI});
+          nextToProcess.push_back({armPos, len, leftToProcess, finalStage - 1,
+                                   charI, id, origExp, newPath});
         }
       }
 
       toProcess = nextToProcess;
     }
+    // cout << endl;
+    // print("------------------shortest len: {} -----------------\n",
+    // shortestLen);
 
     auto calcNumericPart = [&code]() -> int {
       string newCode = code;
@@ -205,8 +288,9 @@ int main() {
   // clang-format off
   printf("solve1 ex0 (126384 expected): %llu\n", solve1("ex0", 2));
   printf("solve1 in0 (164960 expected): %llu\n", solve1("in0", 2));
+  printf("solve1 ex0 ( expected): %llu\n", solve1("ex1", 2));
 
-  // printf("solve2 in0 ( expected): %llu\n", solve1("in0", 20));
+  printf("solve2 in0 ( expected): %llu\n", solve1("in0", 25));
   // clang-format on
   return 0;
 }
