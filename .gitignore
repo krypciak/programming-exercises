@@ -13,10 +13,4 @@ ex*
 *.rec
 *.gif
 
-oi/32/e1/wal/tests/input3
-oi/32/e1/wal/tests/output3
-
-oi/32/e1/zam/tests/input3
-oi/32/e1/zam/tests/output3
-oi/32/e1/zam/tests/input5
-oi/32/e1/zam/tests/output5
+!cses/increasing-array
