@@ -14,3 +14,4 @@ ex*
 *.gif
 
 !cses/increasing-array
+!cses/introductory-problems
