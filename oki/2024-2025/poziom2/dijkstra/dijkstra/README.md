@@ -1,3 +1,3 @@
-# [Szkopuł - Dijkstra Dijkstra](https://szkopul.edu.pl/problemset/problem/Ik13DlOhJ9ujfLr0VFoy_st4/site/?key=statement)
+# [OKI poziom 2 2024/2025 - Dijkstra Dijkstra](https://szkopul.edu.pl/problemset/problem/Ik13DlOhJ9ujfLr0VFoy_st4/site/?key=statement)
 
 `100` points.
