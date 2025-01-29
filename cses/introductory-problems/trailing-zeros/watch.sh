@@ -3,7 +3,7 @@
 comp() {
     clear
     echo "compiling..."
-    g++ a.cpp -o a -Wall -DDEBUG -std=c++23 -g -fsanitize=address,undefined,leak,float-divide-by-zero,float-cast-overflow && echo "-----" && ./a
+    g++ a.cpp -o a.e -Wall -DDEBUG -std=c++23 -g -fsanitize=address,undefined,leak,float-divide-by-zero,float-cast-overflow && echo "-----" && ./a.e
 }
 
 export -f comp

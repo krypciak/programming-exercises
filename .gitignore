@@ -1,4 +1,4 @@
-a
+a.e
 a.exe
 bigboy
 bigboy.txt
@@ -12,6 +12,3 @@ in*
 ex*
 *.rec
 *.gif
-
-!cses/increasing-array
-!cses/introductory-problems
