@@ -10,5 +10,7 @@ gcd
 
 in*
 ex*
+*.in
+*.out
 *.rec
 *.gif
