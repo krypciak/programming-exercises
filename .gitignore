@@ -5,7 +5,6 @@ bigboy*
 .tup
 .gdb_history
 gcd
-
 in0
 in1
 in2
@@ -14,6 +13,5 @@ in*.txt
 ex*.in*
 ex*.out*
 aoc/2024/**/ex*
-
 *.rec
 *.gif
