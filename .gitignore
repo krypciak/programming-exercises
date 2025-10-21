@@ -12,6 +12,8 @@ in2
 in3
 in*.txt
 
+*.in
+*.out
 ex*.in*
 ex*.out*
 aoc/2024/**/ex*
