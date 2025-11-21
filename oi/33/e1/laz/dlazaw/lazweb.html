@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Łazik kosmiczny</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background: #f7f7f7;
+        margin: 0;
+        padding: 20px;
+      }
+      canvas {
+        border: 2px solid #444;
+        margin-top: 20px;
+        background: white;
+
+        width: 500px;
+        height: 500px;
+        image-rendering: pixelated;
+      }
+      input,
+      button,
+      select {
+        margin: 5px;
+        padding: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Łazik kosmiczny</h1>
+    <!-- value="5" -->
+    <label
+      >Liczba wierszy (n): <input type="number" id="rows" value="4392" required
+    /></label>
+    <!-- value="4" -->
+    <label
+      >Liczba kolumn (m): <input type="number" id="cols" value="9028" required
+    /></label>
+    <br />
+    <!-- value="PPPDDDLLGPGLLDDDPPP" -->
+    <label
+      >Instrukcje:
+      <input
+        type="text"
+        id="instructions"
+        style="min-width: 250px"
+        value="DLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL"
+        required
+    /></label>
+    <br />
+    <label
+      >Opóżnienie kroku:
+      <select id="delayElement">
+        <option value="2000">Bardzo wolna (2000ms)</option>
+        <option value="1000">Wolna (1000ms)</option>
+        <option value="200">Normalna (200ms)</option>
+        <option value="100">Szybka (100ms)</option>
+        <option value="30">Bardzo szybka (30ms)</option>
+        <option value="0" selected>Najszybsza (0ms)</option>
+      </select>
+    </label>
+    <label
+      >step per frame
+      <input
+        type="range"
+        id="spfElement"
+        min="1"
+        max="30"
+        value="0"
+        step="1"
+        style=""
+      /></label
+    >
+    <label>fps <input type="text" id="fpsElement" value="20" required /></label>
+    <br />
+    <button onclick="resetAnimation(); startAnimation()">Zresetuj i zacznij</button>
+    <button onclick="startAnimation()">Zacznij/wznów animację</button>
+    <button onclick="stopAnimation()">Wstrzymaj animację</button>
+    <button onclick="manualStepForward()">Zrób krok</button>
+    <!-- <button onclick="stepBackward()">Cofnij krok</button> -->
+    <button onclick="resetAnimation()">Zresetuj animację</button>
+    <br>
+    <p id="tilesLeftParagrah">Tiles left: 0</p
+    <br />
+    <canvas id="gridCanvas" width="800" height="800"></canvas>
+
+    <script>
+      const canvas = document.getElementById("gridCanvas");
+      const ctx = canvas.getContext("2d");
+
+      let n, m, instructions;
+      let animationId = null;
+      let stepIntervalId = null;
+      let delay = 500;
+
+      let imageData;
+      let x, y;
+      let i;
+      let fps;
+      let lastDrawn = 0;
+      let lastDrawnTilesLeft
+      let tilesLeft;
+      let spf
+
+      function updateTilesLeft() {
+        tilesLeftParagrah.innerText = `Tiles left: ${tilesLeft}`
+      }
+
+      function drawGrid() {
+        if (lastDrawnTilesLeft != tilesLeft) {
+          ctx.putImageData(imageData, 0, 0);
+          ctx.fillStyle = "red";
+          ctx.fillRect(x, y, 1, 1);
+
+          updateTilesLeft()
+        }
+        lastDrawnTilesLeft = tilesLeft
+
+        
+        return;
+      }
+
+      function stopAnimation() {
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+          animationId = null;
+        }
+        if (stepIntervalId) {
+          clearTimeout(stepIntervalId);
+          stepIntervalId = null;
+        }
+      }
+
+      function setAt(x, y) {
+        const index = x + y * m;
+        const dataIndex = index * 4;
+        const r = 0, g = 0, b = 0
+
+        if (imageData.data[dataIndex] != 0) {
+          tilesLeft--
+        }
+         
+        imageData.data[dataIndex] = r;
+        imageData.data[dataIndex + 1] = g;
+        imageData.data[dataIndex + 2] = b;
+        imageData.data[dataIndex + 3] = 255;
+
+      }
+
+      function moveRover(instr) {
+        if (instr === "G") y = (y - 1 + n) % n;
+        else if (instr === "D") y = (y + 1) % n;
+        else if (instr === "L") x = (x - 1 + m) % m;
+        else if (instr === "P") x = (x + 1) % m;
+
+        setAt(x, y);
+      }
+
+      function stepForward() {
+        if (++i == instructions.length) i = 0;
+        moveRover(instructions[i]);
+      }
+      function manualStepForward() {
+        stopAnimation();
+        stepForward();
+        drawGrid();
+      }
+      function stepBackward() {
+        // if (visited.length > 1) {
+        //     stopAnimation();
+        //     visited.pop();
+        //     drawGrid();
+        // }
+      }
+
+      function startAnimation() {
+        stopAnimation();
+        // if (visited.length == 1) {
+        n = parseInt(document.getElementById("rows").value);
+        m = parseInt(document.getElementById("cols").value);
+        instructions = document.getElementById("instructions").value;
+
+        // Validation
+        if (!n || !m || !instructions) {
+          alert("Wszystkie pola muszą być wypełnione!");
+          return;
+        }
+        if (n < 0 || m < 0) {
+          alert("Wymiary planszy muszą być dodatnie!");
+          return;
+        }
+
+        // Check instructions only contain D, G, P, L
+        if (!/^[DGPL]+$/.test(instructions)) {
+          alert("Instrukcje mogą zawierać tylko litery D, G, P, L!");
+          return;
+        }
+        // }
+        delay = parseInt(document.getElementById("delayElement").value);
+
+        let i = 0;
+        function drawLoop() {
+          const now = Date.now();
+          if (lastDrawn <= now - 1000 / fps) {
+            drawGrid();
+            lastDrawn = now;
+          }
+          requestAnimationFrame(drawLoop);
+        }
+        drawLoop();
+
+        function stepLoop() {
+          for (let i = 0; i < spf; i++) {
+            stepForward();
+          }
+          if (tilesLeft <= 0) {
+            stopAnimation()
+          }
+        }
+        stepIntervalId = setInterval(stepLoop, delay);
+      }
+
+      function resetAnimation() {
+        x = 0;
+        y = 0;
+        i = -1;
+        stopAnimation();
+        n = parseInt(document.getElementById("rows").value);
+        m = parseInt(document.getElementById("cols").value);
+        canvas.width = m;
+        canvas.height = n;
+        tilesLeft = n*m
+        lastDrawnTilesLeft = 0
+
+        instructions = document.getElementById("instructions").value;
+        delay = parseInt(document.getElementById("delayElement").value);
+
+        fps = Number(document.getElementById("fpsElement").value);
+
+        const spfElementValue = Number(document.getElementById("spfElement").value)
+        spf = Math.max(1, Math.min(10000000, Math.floor(n*m * (spfElementValue/100))))
+        if (spfElementValue == 0) spf = 1
+
+        imageData = ctx.createImageData(m, n);
+        const data = imageData.data;
+        for (let i = 0; i < data.length; i += 4) {
+          data[i] = 255;
+          data[i + 1] = 255;
+          data[i + 2] = 255;
+          data[i + 3] = 0;
+        }
+        ctx.putImageData(imageData, 0, 0);
+        setAt(0, 0);
+
+        drawGrid();
+      }
+
+      resetAnimation();
+    </script>
+  </body>
+</html>
