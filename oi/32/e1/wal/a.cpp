@@ -16,7 +16,7 @@ struct Bot {
 };
 
 int main(void) {
-#ifdef DEBUG
+#ifdef TEST
   ifstream cin("tests/input1/test908.in");
   signal(SIGINT, [](int signum) { exit(signum); });
 #endif

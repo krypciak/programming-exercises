@@ -6,11 +6,7 @@ void printRow(ostream &cout, int from, int to) {
   cout << from+1 << ' ' << to+1 << '\n';
 }
 
-#ifdef TEST
 int run(istream &cin, ostream &cout) {
-#else
-int main() {
-#endif
   ios_base::sync_with_stdio(0), cin.tie(0);
 
   int n, m;
@@ -78,11 +74,10 @@ int main() {
   }
   return 0;
 }
-#ifdef TEST
-string rtrim(string s) {
-  auto end = s.find_last_not_of(" \t\r\v\f\n");
-  return end == string::npos ? s : s.substr(0, end + 1);
-}
+#ifndef TEST
+int main() { run(cin, cout); }
+#else
+#define TEST_OK
 bool isTestOk(string inpS, string expS, string outS) {
   if (inpS.size()) {}
   stringstream exp(expS);
@@ -94,38 +89,7 @@ bool isTestOk(string inpS, string expS, string outS) {
   out >> outC;
   return expC == outC;
 }
-bool printT(string name, string expS, string outS, string inpS, bool passPrint) {
-  if (isTestOk(inpS, expS, outS)) {
-    if (passPrint) {
-      printf("\u001b[32m\u001b[1m\u221A\u001b[0m\u001b[22m %s success\n", name.c_str());
-    }
-    return true;
-  } else {
-    int limit = 200;
-    printf("\u001b[31m\u001b[1mx\u001b[0m\u001b[22m %s fail! expected: \n'%s'\n-----got: \n'%s'\n\n",
-           name.c_str(), expS.substr(0, limit).c_str(), outS.substr(0, limit).c_str());
-    return false;
-  }
-}
-bool testStrs(string &name, string inS, string expS, bool passPrint = true) {
-  stringstream in(inS);
-  ostringstream out;
-
-  run(in, out);
-  string outS = rtrim(out.str());
-
-  expS = rtrim(expS);
-
-  return printT(name, expS, outS, inS, passPrint);
-}
-void test(string name, bool passPrint = true) {
-  ifstream in(name + ".in");
-  ifstream exp(name + ".out");
-
-  string inS(istreambuf_iterator<char>{in}, {});
-  string expS(istreambuf_iterator<char>{exp}, {});
-  testStrs(name, inS, expS, passPrint);
-}
+#include "../../../../tester.h"
 int main() {
   test("han0b");
   test("ex0");

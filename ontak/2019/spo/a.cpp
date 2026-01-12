@@ -3,7 +3,7 @@
 #include <cassert>
 #include <queue>
 
-#ifdef DEBUG
+#ifdef TEST
 #include <print>
 #include <sstream>
 #include <fstream>
@@ -11,11 +11,7 @@
 
 using namespace std;
 
-#ifdef DEBUG
 int run(istream &cin, ostream &cout) {
-#else
-int main() {
-#endif
 	ios_base::sync_with_stdio(false);
 	cin.tie(nullptr);
 
@@ -88,30 +84,11 @@ int main() {
 	return 0;
 }
 
-#ifdef DEBUG
-string rtrim(const string &str) {
-	size_t end = str.find_last_not_of(" \n\r\t\f\v");
-	return (end == string::npos) ? str : str.substr(0, end + 1);
-}
-int test(string name) {
-	ifstream in(format("{}.in", name));
-	ostringstream out;
 
-	ifstream exp(format("{}.out", name));
-	string expStr(istreambuf_iterator<char>{exp}, {});
-	expStr = rtrim(expStr);
-
-	run(in, out);
-	string outStr = rtrim(out.str());
-
-	if (outStr != expStr) {
-		print("\u001b[1m\u001b[31mx\u001b[0m\u001b[22m {} expected: \n'{}'\n---got:\n'{}'\n\n", name, expStr, outStr);
-	} else {
-		print("\u001b[1m\u001b[32m\u221A\u001b[0m\u001b[22m {}\n", name);
-	}
-
-	return 0;
-}
+#ifndef TEST
+int main() { run(cin, cout); }
+#else
+#include "../../../tester.h"
 int main() {
 	test("ex0");
 	test("ex1");

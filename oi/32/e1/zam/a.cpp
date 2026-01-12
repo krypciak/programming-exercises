@@ -19,7 +19,7 @@ uc digits[ARR_SIZE];
 uc digits1[ARR_SIZE];
 
 int main(void) {
-#ifdef DEBUG
+#ifdef TEST
   ifstream cin("tests/input1/zam0.in");
   signal(SIGINT, [](int signum) { exit(signum); });
 #endif

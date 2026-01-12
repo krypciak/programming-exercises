@@ -1,7 +1,4 @@
-#include <algorithm>
 #include <bits/stdc++.h>
-#include <cstdio>
-
 using namespace std;
 
 typedef long long ll;
@@ -68,7 +65,7 @@ void test() {
 }
 
 int main() {
-#ifdef DEBUG
+#ifdef TEST
   test();
 #else
   cout << run() << endl;

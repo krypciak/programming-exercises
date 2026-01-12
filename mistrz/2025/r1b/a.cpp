@@ -52,7 +52,7 @@ qwerty)",
 }
 
 int main() {
-#ifdef DEBUG
+#ifdef TEST
   test();
 #else
   cout << run() << endl;

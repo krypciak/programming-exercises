@@ -1,22 +1,9 @@
-#include <iostream>
-#include <vector>
-#include <cmath>
-#include <climits>
- 
+#include <bits/stdc++.h>
 using namespace std;
 typedef unsigned long long ll;
  
-#ifdef TEST
-#include <print>
-#include <fstream>
-#include <sstream>
- 
 int run(istream &cin, ostream &cout) {
-#else
-int main() {
-#endif
-	ios_base::sync_with_stdio(0);
-	cin.tie(0);
+	ios_base::sync_with_stdio(0), cin.tie(0);
  
 	int q;
 	cin >> q;
@@ -45,32 +32,10 @@ int main() {
 	return 0;
 }
  
-#ifdef TEST
-string rtrim(const string &s) {
-	auto end = s.find_last_not_of(" \n\r\t\v\f");
-	return end == string::npos ? s : s.substr(0, end+1);
-}
-bool printRes(const string& name, const string &expStr, const string &outStr, bool printSuccess = true) {
-	if (outStr != expStr) {
-		print("\u001b[31m\u001b[1mx\u001b[0m\u001b[22m {} failed! expected:\n'{}'\n----got:\n'{}'\n\n", name, expStr, outStr);
-		return false;
-	} else {
-		if (printSuccess) print("\u001b[32m\u001b[1m\u221A\u001b[0m\u001b[22m {} success\n", name);
-		return true;
-	}
-}
-void test(const string &name) {
-	ifstream in(format("{}.in", name));
-	ostringstream out;
- 
-	ifstream exp(format("{}.out", name));
-	string expStr(istreambuf_iterator<char>{exp}, {});
-	expStr = rtrim(expStr);
- 
-	run(in, out);
-	string outStr = rtrim(out.str());
-	printRes(name, expStr, outStr);
-}
+#ifndef TEST
+int main() { run(cin, cout); }
+#else
+#include "../../../tester.h"
 void fuzz() {
 	const int N = 4;
 	string str = " ";
@@ -87,7 +52,9 @@ void fuzz() {
 		run(in, out);
 		string resStr = rtrim(out.str());
  
-		if (!printRes(format("fuzz k: {}", k), format("{}", str[k]), resStr, false)) {
+		bool isOk = isTestOk("", format("{}", str[k]), resStr);
+		printT(format("fuzz k: {}", k), format("{}", str[k]), resStr, "", isOk);
+		if (!isOk) {
 			const int from = 10;
 			const int to = 10;
 			for (int j = k - from; j < k + to; j++) cout << j << '\t';
@@ -101,7 +68,7 @@ void fuzz() {
 		}
 	}
 	if (k == (int)str.size()) {
-		printRes("fuzz all", "", "");
+		printT("fuzz all", "", "", "", true);
 	}
 }
 int main() {

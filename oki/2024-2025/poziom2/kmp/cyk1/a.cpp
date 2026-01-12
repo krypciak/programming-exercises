@@ -2,11 +2,7 @@
 using namespace std;
 typedef long long ll;
 
-#ifdef TEST
 int run(istream &cin, ostream &cout) {
-#else
-int main() {
-#endif
 	ios_base::sync_with_stdio(0), cin.tie(0);
 
 	int n;

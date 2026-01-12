@@ -57,32 +57,11 @@ int main() {
 	return 0;
 }
 
-#ifdef TEST
-string rtrim(string s) {
-	auto end = s.find_last_not_of(" \n\r\t\v\f");
-	return end == string::npos ? s : s.substr(0, end+1);
-}
-bool printT(string name, string expS, string outS) {
-	if (expS == outS) {
-		print("\u001b[32m\u001b[1m\u221A\u001b[0m\u001b[22m {} success\n", name, expS, outS);
-	} else {
-		print("\u001b[31m\u001b[1mx\u001b[0m\u001b[22m {} fail! expected: \n'{}'\n---got: \n'{}'\n\n", name, expS, outS);
-	}
-	return expS == outS;
-}
-void test(string name) {
-	ifstream in(name + ".in");
-	ostringstream out;
 
-	ifstream exp(name + ".out");
-	string expS(istreambuf_iterator<char>{exp}, {});
-	expS = rtrim(expS);
-
-	run(in, out);
-
-	string outS = rtrim(out.str());
-	printT(name, expS, outS);
-}
+#ifndef TEST
+int main() { run(cin, cout); }
+#else
+#include "../../../../tester.h"
 int main() {
 	test("ex0");
 	return 0;

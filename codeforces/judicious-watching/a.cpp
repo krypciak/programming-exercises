@@ -51,7 +51,7 @@ template <> struct std::formatter<Task> : std::formatter<std::string> {
   }
 };
 
-void run(istream &cin, ostream &cout) {
+int run(istream &cin, ostream &cout) {
   int testCases;
   cin >> testCases;
 
@@ -159,41 +159,16 @@ void run(istream &cin, ostream &cout) {
 
     // print("\n");
   }
-}
-
-std::string rtrim(const string &s) {
-  size_t end = s.find_last_not_of(" \n\r\t\f\v");
-  return (end == string::npos) ? "" : s.substr(0, end + 1);
-}
-
-void tf(string name) {
-  ifstream in(format("{}.in", name));
-  ostringstream out;
-
-  ifstream exp(format("{}.out", name));
-  string expStr(istreambuf_iterator<char>{exp}, {});
-  expStr = rtrim(expStr);
-
-  run(in, out);
-  string outStr = rtrim(out.str());
-
-  if (outStr != expStr) {
-    print("test {} failed! expected: \n'{}'\n--- got \n'{}'\n", name, expStr,
-          outStr);
-  } else {
-    print("test {} success\n", name);
-  }
-}
-void test() {
-  tf("ex0");
-  tf("ex1");
-}
-
-int main() {
-#ifdef DEBUG
-  test();
-#else
-  run(cin, cout);
-#endif
   return 0;
 }
+
+#ifndef TEST
+int main() { return run(cin, cout); }
+#else
+#include "../../tester.h"
+int main() {
+  test("ex0");
+  test("ex1");
+  return 0;
+}
+#endif

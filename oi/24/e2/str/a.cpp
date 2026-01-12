@@ -25,11 +25,7 @@ int n, m;
 vector<vector<int>> G;
 
 
-#ifdef TEST
 int run(istream &cin, ostream &cout) {
-#else
-int main() {
-#endif
 	ios_base::sync_with_stdio(0), cin.tie(0);
 	vector<bool> O;
 	vector<int> topSortT;

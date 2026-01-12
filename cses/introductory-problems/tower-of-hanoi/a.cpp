@@ -1,22 +1,7 @@
-#include <iostream>
-#include <vector>
-#include <cassert>
-#include <bitset>
-#include <unordered_set>
-#include <cmath>
-#include <stack>
-
+#include <bits/stdc++.h>
 using namespace std;
 
-#ifdef TEST
-#include <print>
-#include <fstream>
-#include <sstream>
-
 int run(istream &cin, ostream &cout) {
-#else
-int main() {
-#endif
 	ios_base::sync_with_stdio(0), cin.tie(0);
 	int n;
 	cin >> n;
@@ -76,28 +61,10 @@ int main() {
 	return 0;
 }
 
-#ifdef TEST
-string rtrim(const string& str) {
-	auto end = str.find_last_not_of(" \n\r\t\v\f");
-	return (end == string::npos) ? str : str.substr(0, end + 1);
-}
-void test(string name) {
-	ifstream in(format("{}.in", name));
-	ostringstream out;
-
-	ifstream exp(format("{}.out", name));
-	string expStr(istreambuf_iterator<char>{exp}, {});
-	expStr = rtrim(expStr);
-
-	run(in, out);
-	string outStr = rtrim(out.str());
-
-	if (expStr != outStr) {
-		print("\u001b[1m\u001b[31mx\u001b[0m\u001b[22m {} expected: \n'{}'\n----got:\n'{}'\n\n", name, expStr, outStr);
-	} else {
-		print("\u001b[1m\u001b[32m\u221A\u001b[0m\u001b[22m {}\n", name);
-	}
-}
+#ifndef TEST
+int main() { run(cin, cout); }
+#else
+#include "../../../tester.h"
 int main() {
 	test("ex0");
 	test("ex1");
