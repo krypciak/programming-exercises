@@ -25,7 +25,7 @@ bool testStrs(string &name, string inpS, string expS, bool passPrint = true) {
 
   expS = rtrim(expS);
   bool ok = isTestOk(inpS, expS, outS);
-  if (passPrint) printT(name, expS, outS, inpS, ok);
+  if (!ok or passPrint) printT(name, expS, outS, inpS, ok);
   return ok;
 }
 bool test(string name, bool passPrint = true) {
